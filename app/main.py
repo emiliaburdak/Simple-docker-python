@@ -15,7 +15,7 @@ def main():
     args = sys.argv[4:]
 
     # temporary directory
-    temp_dir_path = tempfile.mktemp()
+    temp_dir_path = tempfile.mkdtemp()
 
     # copy directory
     shutil.copy2(command, temp_dir_path)
