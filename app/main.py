@@ -1,5 +1,8 @@
 import subprocess
 import sys
+import tempfile
+import os
+import shutil
 
 
 def main():
@@ -11,12 +14,24 @@ def main():
     command = sys.argv[3]
     args = sys.argv[4:]
 
+    # temporary directory
+    temp_dir_path = tempfile.mktemp()
+
+    # copy directory
+    shutil.copy2(command, temp_dir_path)
+
+    # change path from root to temp_dir_path
+    os.chroot(temp_dir_path)
+
+    # make new path
+    new_command = "/" + os.path.basename(command)
+
     # completed_process = subprocess.run([command, *args], capture_output=True)
     # print(completed_process.stdout.decode("utf-8"))
 
     # Execute with command, args but capture out and err
     # communicate() reads all the processes inputs and outputs and stores it in the variables
-    completed_process = subprocess.Popen([command, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    completed_process = subprocess.Popen([new_command, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = completed_process.communicate()
 
     # it works like print
