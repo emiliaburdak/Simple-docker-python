@@ -3,6 +3,7 @@ import sys
 import tempfile
 import os
 import shutil
+import ctypes
 
 
 def main():
@@ -27,12 +28,18 @@ def main():
     # This is useful because you only need the file name to refer to it in the new chroot environment
     new_command = "/" + os.path.basename(command)
 
-    # create new PID namespace
-    new_command_unshare = ["unshare", "--fork", "--pid", "--mount-proc", new_command]
+    # loads the C standard library (libc) into the current Python process
+    libc = ctypes.cdll.LoadLibrary(None)
+
+    # A bit value representing a flag used in the system call for unshare in Linux.
+    CLONE_NEWPID = 0x20000000
+
+    # creation of a new PID namespace for the process and its descendants
+    libc.unshare(CLONE_NEWPID)
 
     # Execute with command, args but capture out and err
     # communicate() reads all the processes inputs and outputs and stores it in the variables
-    completed_process = subprocess.Popen(new_command_unshare + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    completed_process = subprocess.Popen([new_command, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = completed_process.communicate()
 
     # it works like print
