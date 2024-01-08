@@ -24,14 +24,15 @@ def main():
     os.chroot(temp_dir_path)
 
     # make new path
+    # This is useful because you only need the file name to refer to it in the new chroot environment
     new_command = "/" + os.path.basename(command)
 
-    # completed_process = subprocess.run([command, *args], capture_output=True)
-    # print(completed_process.stdout.decode("utf-8"))
+    # create new PID namespace
+    new_command_unshare = ["unshare", "--fork", "--pid", "--mount-proc", new_command]
 
     # Execute with command, args but capture out and err
     # communicate() reads all the processes inputs and outputs and stores it in the variables
-    completed_process = subprocess.Popen([new_command, *args], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    completed_process = subprocess.Popen(new_command_unshare + args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = completed_process.communicate()
 
     # it works like print
