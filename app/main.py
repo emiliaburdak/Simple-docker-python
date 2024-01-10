@@ -31,7 +31,7 @@ def request(url, headers=None, type="json"):
     # make connection to url using request object and return response
     with urllib.request.urlopen(req) as response:
         if type == "json":
-            return json.loads(response.read().decode("urf-8"))
+            return json.loads(response.read().decode("utf-8"))
         return response.read()
 
 
